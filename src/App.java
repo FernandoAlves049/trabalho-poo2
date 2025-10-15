@@ -11,6 +11,12 @@ import java.util.*;
 
 public class App {
     public static void main(String[] args) {
+        // se passado --gui, abre interface Swing mais fácil de usar
+        if (args != null && args.length > 0 && "--gui".equalsIgnoreCase(args[0])) {
+            ui.GuiApp.main(args);
+            return;
+        }
+
         String path = Paths.get("data", "populacao.csv").toString();
 
         try {
