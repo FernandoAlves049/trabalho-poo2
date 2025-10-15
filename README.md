@@ -262,3 +262,34 @@ Se ocorrer `ArquivoInvalidoException`, verifique o conteúdo de `data/populacao.
 - Melhorar `Entrada` para suportar diferentes formatos (CSV com encoding, delimitador) e políticas de deduplicação/merge para registros repetidos.
 - Adicionar logging (slf4j/logback) em vez de `System.out` para facilitar depuração em produção.
 - Se desejar que eu gere testes JUnit ou um ZIP para entrega, diga qual opção prefere e eu gero em seguida.
+
+---
+
+## Interface gráfica (Swing)
+Adicionei uma interface desktop simples usando Swing para facilitar o uso interativo (opção a mais fácil de trabalhar). A interface permite:
+
+- Abrir um arquivo CSV via diálogo (`Abrir CSV...`).
+- Visualizar todas as regiões em uma tabela com ordenação por coluna.
+- Ver colunas: Tipo, Código, Nome, Área (km²), Última População, Densidade e Crescimento (%).
+
+Arquivos adicionados:
+- `src/ui/RegiaoTableModel.java` — TableModel que converte `Regiao` em linhas/colunas para a tabela Swing.
+- `src/ui/GuiApp.java` — Janela Swing com `JFileChooser` para abrir o CSV e popular a tabela.
+
+Como executar a GUI:
+1) Compile como de costume:
+```powershell
+$files = Get-ChildItem -Path src -Recurse -Filter *.java | ForEach-Object { $_.FullName }
+javac -d out -sourcepath src $files
+```
+2) Execute com a flag `--gui`:
+```powershell
+java -cp out App --gui
+```
+
+Observações sobre o parser/Entrada:
+- O parser (`Entrada.lerArquivo`) agora detecta automaticamente o delimitador `;` ou `,` e aceita arquivos com ou sem header.
+- Para `ESTADO` linhas do tipo `ESTADO;52;Goiás;GO` o parser cria o `Estado` (código, nome, UF). Se houver campos numéricos na mesma linha (ex.: área, ano, habitantes) tenta extrair e acrescentar ao histórico.
+- Para `MUNICIPIO` o parser tenta detectar ano (token com 4 dígitos) e habitantes, e também a área em posições próximas; se não encontrar, usa campos padrão.
+- Associação município→estado: tenta usar `codigoEstado` quando presente; caso contrário, usa um fallback simples derivado dos primeiros caracteres do código do município (ajustável conforme regra local).
+
